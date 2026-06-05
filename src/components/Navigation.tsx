@@ -8,6 +8,7 @@ const navLinks = [
   { name: 'Work', path: '/projects' },
   { name: 'Story', path: '/about' },
   { name: 'Connect', path: '/contact' },
+  { name: 'Tools', path: '/tools' },
 ];
 
 function MagneticLink({ children, to }: { children: React.ReactNode; to: string }) {

@@ -8,6 +8,7 @@ const Home = lazy(() => import('./pages/Home'));
 const Projects = lazy(() => import('./pages/Projects'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
+const Tools = lazy(() => import('./pages/Tools'));
 
 function App() {
   const location = useLocation();
@@ -23,6 +24,9 @@ function App() {
               <Route path="projects" element={<Projects />} />
               <Route path="about" element={<About />} />
               <Route path="contact" element={<Contact />} />
+              <Route path="tools" element={<Tools />} />
+              <Route path='tools/:id' element={<Tools />} />
+              <Route path="*" element={<div>404</div>} />
             </Route>
           </Routes>
         </AnimatePresence>
