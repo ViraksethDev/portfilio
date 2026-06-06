@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Send, Mail, MapPin, Phone } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 
 function Contact() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -18,8 +19,15 @@ function Contact() {
     springConfig,
   );
 
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || isMobile) return;
     const rect = containerRef.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -59,7 +67,11 @@ function Contact() {
               ref={containerRef}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
-              style={{ rotateX, rotateY, transformPerspective: 1000 }}
+              style={{
+                rotateX: isMobile ? 0 : rotateX,
+                rotateY: isMobile ? 0 : rotateY,
+                transformPerspective: 1000,
+              }}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}

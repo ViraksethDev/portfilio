@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   X,
@@ -23,6 +24,7 @@ import SendToCrush from "../components/tools/SendToCrush";
 
 const tools = [
   {
+    routeId: 1,
     id: "calculator",
     name: "Calculator",
     description: "Advanced calculator with basic operations",
@@ -31,6 +33,7 @@ const tools = [
     component: Calculator,
   },
   {
+    routeId: 2,
     id: "json",
     name: "JSON Formatter",
     description: "Format, minify, and validate JSON",
@@ -39,6 +42,7 @@ const tools = [
     component: JSONFormatter,
   },
   {
+    routeId: 3,
     id: "color",
     name: "Color Picker",
     description: "Convert colors between formats (HEX, RGB, HSL)",
@@ -47,6 +51,7 @@ const tools = [
     component: ColorPicker,
   },
   {
+    routeId: 4,
     id: "units",
     name: "Unit Converter",
     description: "Convert length, weight, volume, temperature",
@@ -55,6 +60,7 @@ const tools = [
     component: UnitConverter,
   },
   {
+    routeId: 5,
     id: "text",
     name: "Text Case Converter",
     description: "Convert text between different cases",
@@ -63,6 +69,7 @@ const tools = [
     component: TextCaseConverter,
   },
   {
+    routeId: 6,
     id: "password",
     name: "Password Generator",
     description: "Generate secure random passwords",
@@ -71,6 +78,7 @@ const tools = [
     component: PasswordGenerator,
   },
   {
+    routeId: 7,
     id: "markdown",
     name: "Markdown Preview",
     description: "Preview and convert markdown to HTML",
@@ -79,6 +87,7 @@ const tools = [
     component: MarkdownPreview,
   },
   {
+    routeId: 8,
     id: "sendtoCrush",
     name: "Send to Crush",
     description: "Ask your crush with an unclickable No button",
@@ -89,9 +98,21 @@ const tools = [
 ];
 
 function Tools() {
-  const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  const selected = tools.find((t) => t.id === selectedTool);
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const routeId = id ? parseInt(id, 10) : null;
+  const selected = routeId
+    ? tools.find((t) => t.routeId === routeId)
+    : undefined;
+  const selectedTool = selected?.id ?? null;
   const SelectedComponent = selected?.component;
+
+  useEffect(() => {
+    if (id && !selected) {
+      navigate("/tools", { replace: true });
+    }
+  }, [id, selected, navigate]);
 
   return (
     <PageTransition>
@@ -123,18 +144,20 @@ function Tools() {
           </motion.div>
 
           {/* Tools Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
             {tools.map((tool, index) => {
               const IconComponent = tool.icon;
               return (
                 <motion.button
                   key={tool.id}
+                  type="button"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   whileHover={{ y: -8 }}
-                  onClick={() => setSelectedTool(tool.id)}
-                  className="group relative glass hover:glass-strong transition-all duration-300 rounded-xl p-6 text-left"
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate(`/tools/${tool.routeId}`)}
+                  className="group relative w-full glass hover:glass-strong transition-all duration-300 rounded-xl p-6 text-left cursor-pointer touch-manipulation"
                 >
                   {/* Background gradient on hover */}
                   <div
@@ -159,7 +182,7 @@ function Tools() {
                     {tool.description}
                   </p>
 
-                  <div className="mt-4 flex items-center text-neon-pink text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="mt-4 flex items-center text-neon-pink text-sm font-semibold opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     Open Tool →
                   </div>
                 </motion.button>
@@ -174,7 +197,7 @@ function Tools() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setSelectedTool(null)}
+            onClick={() => navigate("/tools")}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4"
           >
             <motion.div
@@ -188,7 +211,7 @@ function Tools() {
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedTool(null)}
+                onClick={() => navigate("/tools")}
                 className="absolute top-6 right-6 z-50 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg p-2 transition-all"
               >
                 <X size={20} />

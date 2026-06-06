@@ -1,27 +1,35 @@
-import { useState, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { useState, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion, useMotionValue, useSpring } from "framer-motion";
+import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { name: 'Home', path: '/' },
-  { name: 'Work', path: '/projects' },
-  { name: 'Story', path: '/about' },
-  { name: 'Connect', path: '/contact' },
-  { name: 'Tools', path: '/tools' },
+  { name: "Home", path: "/" },
+  { name: "Work", path: "/projects" },
+  { name: "Story", path: "/about" },
+  { name: "Connect", path: "/contact" },
+  { name: "Tools", path: "/tools" },
 ];
 
-function MagneticLink({ children, to }: { children: React.ReactNode; to: string }) {
-  const ref = useRef<HTMLAnchorElement>(null);
+function MagneticLink({
+  children,
+  to,
+}: {
+  children: React.ReactNode;
+  to: string;
+}) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const navigate = useNavigate();
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+  const [isTouching, setIsTouching] = useState(false);
 
   const springConfig = { damping: 15, stiffness: 150 };
   const springX = useSpring(x, springConfig);
   const springY = useSpring(y, springConfig);
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!ref.current) return;
+    if (!ref.current || isTouching) return;
     const rect = ref.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -30,26 +38,40 @@ function MagneticLink({ children, to }: { children: React.ReactNode; to: string 
   };
 
   const handleMouseLeave = () => {
+    if (!isTouching) {
+      x.set(0);
+      y.set(0);
+    }
+  };
+
+  const handleTouchStart = () => {
+    setIsTouching(true);
     x.set(0);
     y.set(0);
   };
 
+  const handleTouchEnd = () => {
+    setIsTouching(false);
+  };
+
+  const handleClick = () => {
+    navigate(to);
+  };
+
   return (
-    <motion.a
+    <motion.button
       ref={ref}
-      href={to}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onClick={handleClick}
       style={{ x: springX, y: springY }}
-      className="relative block"
-      onClick={(e) => {
-        e.preventDefault();
-        window.history.pushState({}, '', to);
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      }}
+      className="relative block bg-transparent border-0 cursor-pointer p-0"
+      type="button"
     >
       {children}
-    </motion.a>
+    </motion.button>
   );
 }
 
@@ -78,7 +100,7 @@ function Navigation() {
                   className={`
                     relative px-6 py-3 font-medium text-sm uppercase tracking-wider
                     transition-colors duration-300
-                    ${location.pathname === link.path ? 'text-neon-pink' : 'text-muted-silver hover:text-white'}
+                    ${location.pathname === link.path ? "text-neon-pink" : "text-muted-silver hover:text-white"}
                   `}
                 >
                   {link.name}
@@ -86,7 +108,11 @@ function Navigation() {
                     <motion.div
                       layoutId="activeNav"
                       className="absolute inset-0 bg-white/5 rounded-full -z-10"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 380,
+                        damping: 30,
+                      }}
                     />
                   )}
                 </motion.div>
@@ -105,12 +131,17 @@ function Navigation() {
 
       <motion.div
         initial={false}
-        animate={isOpen ? 'open' : 'closed'}
+        animate={isOpen ? "open" : "closed"}
         variants={{
           open: { opacity: 1, transition: { staggerChildren: 0.1 } },
-          closed: { opacity: 0, transition: { staggerChildren: 0.05, staggerDirection: -1 } },
+          closed: {
+            opacity: 0,
+            transition: { staggerChildren: 0.05, staggerDirection: -1 },
+          },
         }}
-        className="fixed inset-0 z-30 bg-obsidian/95 backdrop-blur-xl md:hidden"
+        className={`fixed inset-0 z-30 bg-obsidian/95 backdrop-blur-xl md:hidden ${
+          isOpen ? "pointer-events-auto" : "pointer-events-none"
+        }`}
       >
         <div className="flex flex-col items-center justify-center h-full gap-8">
           {navLinks.map((link) => (
@@ -126,7 +157,7 @@ function Navigation() {
                 onClick={() => setIsOpen(false)}
                 className={`
                   text-4xl font-display font-bold uppercase tracking-wider
-                  ${location.pathname === link.path ? 'text-gradient' : 'text-white'}
+                  ${location.pathname === link.path ? "text-gradient" : "text-white"}
                 `}
               >
                 {link.name}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Github, Linkedin, ExternalLink } from "lucide-react";
-import CV from '../images/CV.jpg';
+import CV from "../images/CV.jpg";
 
 interface CursorPosition {
   x: number;
@@ -126,7 +126,7 @@ const Footer: React.FC = () => {
                       : "bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
                   }`}
                 >
-                  LET'S BUILD WITH ME •
+                  VIRAKSETH HOY WEB DEVELOPER •
                 </h2>
                 <span
                   className={`text-7xl md:text-8xl font-black mx-8 ${
@@ -185,7 +185,7 @@ const Footer: React.FC = () => {
                 } animate-pulse`}
               />
               <p className="text-sm text-gray-300">
-                Available for freelance & full-time
+                អាចធ្វើការឯករាជ្យ និងពេញម៉ោងបានទាក់ទងបាន
               </p>
             </motion.div>
           </div>

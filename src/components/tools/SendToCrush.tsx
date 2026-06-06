@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 import Boy from "../images/img-tools/boy-along.jpg";
@@ -8,12 +8,18 @@ export default function SendToCrush() {
   const [accepted, setAccepted] = useState(false);
   const [noButtonPos, setNoButtonPos] = useState({ x: 0, y: 0 });
   const [attempts, setAttempts] = useState(0);
+  const noZoneRef = useRef<HTMLDivElement>(null);
 
   const handleNoHover = () => {
-    const randomX = (Math.random() - 0.5) * 200;
-    const randomY = (Math.random() - 0.5) * 200;
+    const zone = noZoneRef.current;
+    const maxX = zone ? Math.max(zone.clientWidth / 2 - 56, 24) : 48;
+    const maxY = zone ? Math.max(zone.clientHeight / 2 - 22, 16) : 32;
+
+    const randomX = (Math.random() - 0.5) * 2 * maxX;
+    const randomY = (Math.random() - 0.5) * 2 * maxY;
+
     setNoButtonPos({ x: randomX, y: randomY });
-    setAttempts(attempts + 1);
+    setAttempts((prev) => prev + 1);
   };
 
   const handleYesClick = () => {
@@ -55,7 +61,7 @@ export default function SendToCrush() {
             transition={{ delay: 0.2, duration: 0.6 }}
           >
             <h2 className="text-3xl font-bold text-white mb-2">
-              Do you love me?
+              ខ្ញុំសូមស្រឡាញ់បានអត់?
             </h2>
             <p className="text-muted-silver text-sm">
               {attempts > 0 &&
@@ -63,38 +69,50 @@ export default function SendToCrush() {
             </p>
           </motion.div>
 
-          {/* Buttons Container */}
-          <div className="flex gap-6 justify-center items-center relative h-16">
-            {/* No Button - Runs away */}
+          {/* Buttons — Yes and No in separate zones so they never overlap */}
+          <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 items-center justify-center w-full px-2">
+            {/* Yes — always tappable, never covered */}
             <motion.button
-              animate={{
-                x: noButtonPos.x,
-                y: noButtonPos.y,
-              }}
-              transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 20,
-              }}
-              onMouseEnter={handleNoHover}
-              onTouchStart={handleNoHover}
-              className="px-8 py-3 bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg font-semibold hover:bg-red-500/30 transition-all duration-300 absolute"
-            >
-              No
-            </motion.button>
-
-            {/* Yes Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
+              type="button"
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleYesClick}
-              className="px-8 py-3 bg-acid-lime/20 border border-acid-lime/50 text-acid-lime rounded-lg font-semibold hover:bg-acid-lime/30 transition-all duration-300"
+              className="relative z-20 w-full sm:w-auto min-w-[140px] px-8 py-3 bg-acid-lime/20 border border-acid-lime/50 text-acid-lime rounded-lg font-semibold hover:bg-acid-lime/30 transition-all duration-300 touch-manipulation"
             >
               Yes
             </motion.button>
+
+            {/* No dodge zone — movement stays inside this box only */}
+            <div
+              ref={noZoneRef}
+              className="relative z-10 w-full sm:w-44 h-24 sm:h-28 flex items-center justify-center overflow-hidden rounded-xl border border-white/5 bg-white/[0.02]"
+            >
+              <motion.button
+                type="button"
+                animate={{
+                  x: noButtonPos.x,
+                  y: noButtonPos.y,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 20,
+                }}
+                onMouseEnter={handleNoHover}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  handleNoHover();
+                }}
+                className="relative px-6 py-3 bg-red-500/20 border border-red-500/50 text-red-400 rounded-lg font-semibold hover:bg-red-500/30 transition-all duration-300 whitespace-nowrap touch-manipulation select-none"
+              >
+                No
+              </motion.button>
+            </div>
           </div>
 
-          <p className="text-xs text-muted-silver">Try to click "No" 😏</p>
+          <p className="text-xs text-muted-silver px-2">
+            សាកល្បងចុច &quot;No&quot; មើល 😏
+          </p>
         </motion.div>
       ) : (
         <motion.div
@@ -161,7 +179,7 @@ export default function SendToCrush() {
                 U បាននិយាយ Yes!
               </p>
               <p className="text-lg text-acid-lime mb-4">
-                ✨ You're in love with me! ✨
+                ✨ អ្នកលង់ស្នេហ៍ខ្ញុំហើយ! ✨
               </p>
             </div>
 
@@ -194,7 +212,7 @@ export default function SendToCrush() {
             }}
             className="w-full px-6 py-3 bg-gradient-primary text-white rounded-lg font-semibold hover:shadow-neon-pink transition-all"
           >
-            Ask Again
+            សួរម្តងទៀត
           </motion.button>
         </motion.div>
       )}
